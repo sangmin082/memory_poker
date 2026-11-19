@@ -1,0 +1,67 @@
+name: Store screenshots
+
+# App Store 제출용 6.9" 스크린샷(1320×2868)을 만들어 아티팩트로 올린다.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "MemoryPokerUITests/StoreScreenshots.swift"
+      - ".github/workflows/store-screenshots.yml"
+
+jobs:
+  screenshots:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick 6.9-inch simulator
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          phones = [d for runtime, ds in sorted(devices.items()) if "iOS" in runtime for d in ds
+                    if d["name"].startswith("iPhone") and "Pro Max" in d["name"]]
+          print(phones[-1]["udid"])
+          print(phones[-1]["name"], file=sys.stderr)
+          ')
+          echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          xcrun simctl boot "$udid"
+          xcrun simctl status_bar "$udid" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+
+      - name: Take screenshots
+        run: |
+          set -o pipefail
+          for lang in ko en; do
+            TEST_RUNNER_STORE_LANG=$lang xcodebuild test \
+              -project MemoryPoker.xcodeproj \
+              -scheme MemoryPoker \
+              -destination "id=$SIM_UDID" \
+              -only-testing:MemoryPokerUITests/StoreScreenshots \
+              -resultBundlePath "$RUNNER_TEMP/store-$lang.xcresult" \
+              | grep -E "Test Case|error:|failed|passed|\*\*"
+          done
+
+      - name: Export
+        if: always()
+        run: |
+          for lang in ko en; do
+            mkdir -p "raw-$lang" "screenshots/$lang"
+            xcrun xcresulttool export attachments --path "$RUNNER_TEMP/store-$lang.xcresult" --output-path "raw-$lang" || true
+            LANG_DIR=$lang python3 - <<'PY'
+          import json, os, shutil
+          lang = os.environ["LANG_DIR"]
+          for test in json.load(open(f"raw-{lang}/manifest.json")):
+              for a in test["attachments"]:
+                  name = a["suggestedHumanReadableName"].split("_")[0]
+                  shutil.copy(f"raw-{lang}/{a['exportedFileName']}", f"screenshots/{lang}/{name}.png")
+          PY
+          done
+          sips -g pixelWidth -g pixelHeight screenshots/*/*.png
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: store-screenshots
+          path: screenshots
