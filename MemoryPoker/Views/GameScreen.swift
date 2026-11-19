@@ -28,7 +28,7 @@ struct GameScreen: View {
                 )
 
                 footer
-                    .frame(height: 148, alignment: .bottom)
+                    .frame(height: 136, alignment: .bottom)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
