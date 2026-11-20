@@ -36,6 +36,13 @@ final class RoomClient {
 
     @ObservationIgnored private var task: URLSessionWebSocketTask?
     @ObservationIgnored private var isHost = false
+    /// 연결 확인(ping)을 돌리고 있는 소켓
+    @ObservationIgnored private var heartbeatTask: URLSessionWebSocketTask?
+
+    /// 서버가 쉬다가 깨어나는 시간까지 기다려 주는 연결 제한 시간(초)
+    private static let connectTimeout: Double = 75
+    private static let pingInterval: Double = 10
+    private static let pingTimeout: Double = 8
 
     // MARK: - 서버 프로토콜
 
@@ -88,6 +95,76 @@ final class RoomClient {
             await send(first)
             await receiveLoop(task)
         }
+        // 응답이 끝내 없으면 '연결 중'에 갇히지 않게 한다
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.connectTimeout))
+            guard let self, self.task === task, case .connecting = self.state else { return }
+            self.fail(.cannotConnect)
+        }
+    }
+
+    // MARK: - 연결 확인
+
+    /// 주기적으로 ping을 보내, 조용히 끊긴 연결(지하철·와이파이 전환 등)을 알아챈다.
+    private func startHeartbeat(_ task: URLSessionWebSocketTask) {
+        guard heartbeatTask !== task else { return }
+        heartbeatTask = task
+        Task { [weak self] in
+            while true {
+                try? await Task.sleep(for: .seconds(Self.pingInterval))
+                guard let self, self.task === task else { return }
+                let alive = await Self.ping(task, timeout: Self.pingTimeout)
+                guard self.task === task else { return }
+                if !alive {
+                    task.cancel(with: .goingAway, reason: nil)
+                    self.connectionLost()
+                    return
+                }
+            }
+        }
+    }
+
+    /// pong이 제한 시간 안에 오면 true
+    private nonisolated static func ping(_ task: URLSessionWebSocketTask, timeout: Double) async -> Bool {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+            let once = Once()
+            task.sendPing { error in
+                if once.claim() { continuation.resume(returning: error == nil) }
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
+                if once.claim() { continuation.resume(returning: false) }
+            }
+        }
+    }
+
+    /// 한 번만 통과시키는 문
+    private final class Once: @unchecked Sendable {
+        private let lock = NSLock()
+        private var claimed = false
+
+        func claim() -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            if claimed { return false }
+            claimed = true
+            return true
+        }
+    }
+
+    /// 연결이 끊겼을 때: 대전 중이면 상대가 나간 것으로, 그 전이면 실패로 처리한다.
+    private func connectionLost() {
+        task = nil
+        switch state {
+        case .matched:
+            state = .opponentLeft
+            onOpponentLeft?()
+        case .waitingForOpponent:
+            state = .failed(.disconnected)
+        case .connecting:
+            state = .failed(.cannotConnect)
+        case .idle, .opponentLeft, .failed:
+            break
+        }
     }
 
     // MARK: - 수신
@@ -97,6 +174,7 @@ final class RoomClient {
             do {
                 let message = try await task.receive()
                 guard self.task === task else { return }
+                startHeartbeat(task)
                 switch message {
                 case .string(let text): handle(Data(text.utf8))
                 case .data(let data): handle(data)
@@ -104,18 +182,7 @@ final class RoomClient {
                 }
             } catch {
                 guard self.task === task else { return }
-                self.task = nil
-                switch state {
-                case .matched:
-                    state = .opponentLeft
-                    onOpponentLeft?()
-                case .waitingForOpponent:
-                    state = .failed(.disconnected)
-                case .connecting:
-                    state = .failed(.cannotConnect)
-                case .idle, .opponentLeft, .failed:
-                    break
-                }
+                connectionLost()
                 return
             }
         }

@@ -42,14 +42,31 @@ jobs:
             -scheme MemoryPoker \
             -destination "id=$SIM_UDID" \
             -skip-testing:MemoryPokerUITests/StoreScreenshots \
+            -skip-testing:MemoryPokerUITests/OnlineTests \
             -resultBundlePath "$RUNNER_TEMP/ui.xcresult" \
             | grep -E "Test Case|error:|failed|passed|\*\*"
+
+      # 온라인 대전은 실제 중계 서버(외부)를 거치므로 러너의 네트워크 사정에 따라 흔들릴 수 있다.
+      # 결과는 로그와 스크린샷으로 남기되, 여기서 실패해도 워크플로를 실패로 만들지는 않는다.
+      - name: Run online tests (needs the relay server)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project MemoryPoker.xcodeproj \
+            -scheme MemoryPoker \
+            -destination "id=$SIM_UDID" \
+            -only-testing:MemoryPokerUITests/OnlineTests \
+            -resultBundlePath "$RUNNER_TEMP/online.xcresult" \
+            | grep -E "Test Case|error:|failed|passed|skipped|\*\*"
 
       - name: Export screenshots
         if: always()
         run: |
           mkdir -p screenshots
           xcrun xcresulttool export attachments --path "$RUNNER_TEMP/ui.xcresult" --output-path screenshots || true
+          mkdir -p screenshots/online
+          xcrun xcresulttool export attachments --path "$RUNNER_TEMP/online.xcresult" --output-path screenshots/online || true
           ls screenshots | head -50
 
       - uses: actions/upload-artifact@v4
