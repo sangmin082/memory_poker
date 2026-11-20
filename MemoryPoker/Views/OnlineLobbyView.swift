@@ -151,7 +151,9 @@ struct OnlineLobbyView: View {
                             .strokeBorder(Theme.ink.opacity(0.5), lineWidth: 1.5)
                     )
                     .onChange(of: joinCode) { _, newValue in
-                        let cleaned = String(newValue.uppercased().filter { $0.isLetter || $0.isNumber }
+                        // 입력 도중 글자를 바꿔 쓰면 빠르게 칠 때 글자가 빠질 수 있어, 대문자 변환은
+                        // 키보드 설정과 입장 시점에 맡기고 여기서는 넘치는 글자·기호만 걸러 낸다.
+                        let cleaned = String(newValue.filter { $0.isLetter || $0.isNumber }
                             .prefix(OnlineConfig.codeLength))
                         if cleaned != newValue { joinCode = cleaned }
                     }

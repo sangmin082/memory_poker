@@ -222,8 +222,8 @@ final class OnlineTests: XCTestCase {
         let field = app.textFields["join-code"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
-        field.typeText(code.lowercased())   // 소문자로 쳐도 대문자로 바뀐다
-        XCTAssertEqual(field.value as? String, code)
+        field.typeText(code.lowercased())   // 소문자로 쳐도 같은 방에 들어간다
+        XCTAssertEqual((field.value as? String)?.uppercased(), code)
         shot("27 코드 입력")
         tapButton("입장")
 
