@@ -202,10 +202,12 @@ final class OnlineTests: XCTestCase {
 
         // 상대가 나가면 알려 주고 로비로 돌아온다
         peer.close()
-        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 45), "상대 퇴장 알림이 뜨지 않았습니다")
+        XCTAssertTrue(app.staticTexts["상대가 나갔습니다"].waitForExistence(timeout: 45), "상대 퇴장 알림이 뜨지 않았습니다")
         shot("26 상대 퇴장")
-        app.alerts.firstMatch.buttons.firstMatch.tap()
-        tapButton("새 방 만들기")
+        tapButton("나가기")
+        let newRoom = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "새 방 만들기")).firstMatch
+        XCTAssertTrue(newRoom.waitForExistence(timeout: 10), "로비로 돌아오지 않았습니다")
+        XCTAssertTrue(newRoom.isEnabled)
     }
 
     /// 상대가 만든 방에 앱이 코드로 들어간다(참가자). 방장이 보낸 시드대로 같은 카드가 깔려야 한다.
