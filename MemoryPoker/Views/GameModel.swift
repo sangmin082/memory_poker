@@ -7,9 +7,11 @@ enum GameMode: Hashable {
     case vsBot(BotLevel)
     /// 한 기기로 둘이서
     case twoPlayer
+    /// 방 코드로 만난 상대와 각자의 기기로
+    case online
 }
 
-/// 자리. 연습·컴퓨터 대전에서는 사람이 first, 컴퓨터가 second.
+/// 자리. 연습·컴퓨터 대전·온라인에서는 이 기기의 사람이 first, 상대가 second.
 enum Seat: Hashable {
     case first, second
 
@@ -25,6 +27,8 @@ enum Phase: Equatable {
     case select(Seat)
     /// 2인 대전: 다음 사람에게 기기를 넘긴다
     case handoff(Seat)
+    /// 온라인: 나는 골랐고 상대가 고르기를 기다린다
+    case waitingForOpponent
     /// 카드 공개와 승패
     case reveal
 }
@@ -38,6 +42,8 @@ struct RoundResult: Equatable {
     let bestValue: HandValue
     /// 최고의 조합이 되는 선택 하나 (누군가 찾았다면 그 선택)
     let bestPick: Pick
+    /// 암기 위반(카드 공개 중 스크린샷)으로 판이 끝났다면 위반한 자리
+    var forfeitedBy: Seat?
 
     /// first 자리가 최고의 조합을 찾았는가
     var isPerfect: Bool { values[.first] == bestValue }
@@ -50,12 +56,13 @@ enum GameSettings {
     static let defaultMemorizeSeconds = 20
 }
 
-/// 한 판의 진행을 관리한다: 암기 타이머, 말 놓기, 컴퓨터의 선택, 공개, 전적 기록.
+/// 한 판의 진행을 관리한다: 암기 타이머, 말 놓기, 컴퓨터·온라인 상대의 선택, 공개, 전적 기록.
 @MainActor
 @Observable
 final class GameModel {
     let mode: GameMode
-    let memorizeDuration: Double
+    /// 공개 시간(초). 온라인에서는 방장이 정한 값을 따른다.
+    private(set) var memorizeDuration: Double
 
     private(set) var deal: Deal
     private(set) var phase: Phase = .ready
@@ -64,10 +71,16 @@ final class GameModel {
     /// 지금 고르는 사람이 말을 놓은 칸 (최대 2칸, 놓은 순서)
     private(set) var selection: [Int] = []
     private(set) var result: RoundResult?
-    /// 이 화면에 들어온 뒤의 승수 (2인 대전 점수판)
+    /// 이 화면에 들어온 뒤의 승수 (2인 대전·온라인 점수판)
     private(set) var sessionWins: [Seat: Int] = [.first: 0, .second: 0]
     /// 2인 대전에서 이번 판에 먼저 고르는 쪽 (판마다 바뀐다)
     private(set) var firstSelector: Seat = .first
+
+    // 온라인
+    /// 내가 이번 판 준비를 눌렀는가
+    private(set) var isLocalReady = false
+    /// 상대가 방을 나갔거나 연결이 끊겼다
+    var opponentLeft = false
 
     @ObservationIgnored private var picks: [Seat: Pick] = [:]
     @ObservationIgnored private var timerTask: Task<Void, Never>?
@@ -75,9 +88,20 @@ final class GameModel {
     @ObservationIgnored private var roundIndex = 0
     /// UI 테스트·스크린샷용: 0보다 크면 판마다 (시드 + 판 번호)로 카드를 깐다
     @ObservationIgnored private let fixedSeed: Int
+    @ObservationIgnored private let client: RoomClient?
+    @ObservationIgnored private let isHost: Bool
+    /// 상대가 준비를 누른 판 번호 (내가 아직 앞 판의 결과를 보고 있을 수 있다)
+    @ObservationIgnored private var remoteReadyRound = -1
 
-    init(mode: GameMode) {
+    init(mode: GameMode, client: RoomClient? = nil) {
         self.mode = mode
+        self.client = client
+        if let client, case .matched(let host) = client.state {
+            isHost = host
+        } else {
+            isHost = false
+        }
+
         let defaults = UserDefaults.standard
         let seconds = defaults.integer(forKey: "memorizeTime")
         memorizeDuration = Double(seconds > 0 ? seconds : GameSettings.defaultMemorizeSeconds)
@@ -87,6 +111,12 @@ final class GameModel {
         var generator = SplitMix64(seed: seed > 0 ? UInt64(seed) : UInt64.random(in: 0...UInt64.max))
         deal = Deal.random(using: &generator)
         rng = generator
+
+        if let client {
+            client.onMessage = { [weak self] message in self?.receive(message) }
+            client.onOpponentLeft = { [weak self] in self?.handleOpponentLeft() }
+            client.send(OnlineMessage(kind: .hello, app: OnlineConfig.appID))
+        }
     }
 
     // MARK: - 화면이 쓰는 상태
@@ -101,7 +131,7 @@ final class GameModel {
     var isCommunityVisible: Bool {
         switch phase {
         case .ready, .memorize: return false
-        case .select, .handoff, .reveal: return true
+        case .select, .handoff, .waitingForOpponent, .reveal: return true
         }
     }
 
@@ -113,9 +143,26 @@ final class GameModel {
 
     var canConfirm: Bool { selectingSeat != nil && selection.count == 2 }
 
+    /// 내가 놓고 확정한 말 (온라인에서 상대를 기다리는 동안 보여 준다)
+    var confirmedPick: Pick? { picks[.first] }
+
     // MARK: - 진행
 
-    func startMemorize() {
+    /// 시작 버튼. 온라인에서는 '준비'를 알리고, 둘 다 준비되면 방장이 판을 정해 함께 시작한다.
+    func start() {
+        guard phase == .ready else { return }
+        guard mode == .online else {
+            startMemorize()
+            return
+        }
+        guard !isLocalReady else { return }
+        isLocalReady = true
+        client?.send(OnlineMessage(kind: .ready, round: roundIndex))
+        Haptics.tap()
+        startOnlineRoundIfBothReady()
+    }
+
+    private func startMemorize() {
         guard phase == .ready else { return }
         phase = .memorize
         remaining = memorizeDuration
@@ -165,7 +212,8 @@ final class GameModel {
 
     func confirm() {
         guard let seat = selectingSeat, selection.count == 2 else { return }
-        picks[seat] = Pick(selection[0], selection[1])
+        let pick = Pick(selection[0], selection[1])
+        picks[seat] = pick
         selection = []
 
         switch mode {
@@ -181,6 +229,14 @@ final class GameModel {
                 phase = .handoff(seat.other)
                 Haptics.move()
             }
+        case .online:
+            client?.send(OnlineMessage(kind: .pick, round: roundIndex, a: pick.low, b: pick.high))
+            if picks[.second] != nil {
+                reveal()
+            } else {
+                phase = .waitingForOpponent
+                Haptics.move()
+            }
         }
     }
 
@@ -190,6 +246,7 @@ final class GameModel {
         phase = .select(seat)
     }
 
+    /// 한 판 더. 온라인에서는 곧바로 준비 상태가 되어 상대를 기다린다.
     func nextRound() {
         timerTask?.cancel()
         roundIndex += 1
@@ -203,13 +260,103 @@ final class GameModel {
         selection = []
         result = nil
         remaining = 0
+        isLocalReady = false
         if mode == .twoPlayer { firstSelector = firstSelector.other }
         phase = .ready
+        if mode == .online { start() }
     }
 
-    /// 화면을 떠날 때 타이머를 멈춘다.
+    /// 화면을 떠날 때 타이머를 멈추고 방을 나간다.
     func stop() {
         timerTask?.cancel()
+        client?.close()
+    }
+
+    // MARK: - 암기 위반
+
+    /// 카드가 공개된 동안 스크린샷을 찍으면 그 판은 몰수패.
+    func screenshotTaken() {
+        guard phase == .memorize else { return }
+        if mode == .online {
+            client?.send(OnlineMessage(kind: .forfeit, round: roundIndex))
+        }
+        forfeit(by: .first)
+    }
+
+    private func forfeit(by seat: Seat) {
+        timerTask?.cancel()
+        remaining = 0
+        selection = []
+        picks = [:]
+        let best = deal.best()
+
+        let outcome: Outcome?
+        switch mode {
+        case .practice, .twoPlayer:
+            // 연습은 승패가 없고, 한 기기 2인 대전은 누가 찍었는지 알 수 없어 무효로 한다
+            outcome = nil
+        case .vsBot, .online:
+            outcome = seat == .first ? .secondWins : .firstWins
+        }
+
+        let roundResult = RoundResult(picks: [:], values: [:], outcome: outcome,
+                                      bestValue: best.value, bestPick: best.picks[0], forfeitedBy: seat)
+        result = roundResult
+        phase = .reveal
+        record(roundResult)
+    }
+
+    // MARK: - 온라인
+
+    private func startOnlineRoundIfBothReady() {
+        guard mode == .online, isHost, phase == .ready, isLocalReady, remoteReadyRound == roundIndex else { return }
+        let seed = fixedSeed > 0 ? UInt64(fixedSeed + roundIndex) : UInt64.random(in: 0...UInt64.max)
+        let seconds = Int(memorizeDuration)
+        client?.send(OnlineMessage(kind: .deal, round: roundIndex, seed: String(seed), seconds: seconds))
+        beginOnlineRound(seed: seed, seconds: seconds)
+    }
+
+    private func beginOnlineRound(seed: UInt64, seconds: Int) {
+        var generator = SplitMix64(seed: seed)
+        deal = Deal.random(using: &generator)
+        memorizeDuration = Double(min(max(seconds, 3), 120))
+        startMemorize()
+    }
+
+    private func receive(_ message: OnlineMessage) {
+        guard mode == .online else { return }
+        switch message.kind {
+        case .hello:
+            if message.app != OnlineConfig.appID {
+                client?.fail(.wrongGame)
+                handleOpponentLeft()
+            }
+        case .ready:
+            guard let round = message.round else { return }
+            remoteReadyRound = max(remoteReadyRound, round)
+            startOnlineRoundIfBothReady()
+        case .deal:
+            // 판은 방장만 정한다
+            guard !isHost, phase == .ready, isLocalReady, message.round == roundIndex,
+                  let seed = message.seed.flatMap({ UInt64($0) }), let seconds = message.seconds else { return }
+            beginOnlineRound(seed: seed, seconds: seconds)
+        case .pick:
+            guard message.round == roundIndex, picks[.second] == nil,
+                  phase == .memorize || selectingSeat != nil || phase == .waitingForOpponent,
+                  let a = message.a, let b = message.b, a != b,
+                  deal.board.indices.contains(a), deal.board.indices.contains(b) else { return }
+            picks[.second] = Pick(a, b)
+            if phase == .waitingForOpponent { reveal() }
+        case .forfeit:
+            guard message.round == roundIndex,
+                  phase == .memorize || selectingSeat != nil || phase == .waitingForOpponent else { return }
+            forfeit(by: .second)
+        }
+    }
+
+    private func handleOpponentLeft() {
+        timerTask?.cancel()
+        opponentLeft = true
     }
 
     // MARK: - 공개
@@ -245,23 +392,35 @@ final class GameModel {
     private func record(_ result: RoundResult) {
         switch mode {
         case .practice:
-            Stats.addPractice(perfect: result.isPerfect)
-            result.isPerfect ? Haptics.success() : Haptics.failure()
+            Stats.addPractice(perfect: result.forfeitedBy == nil && result.isPerfect)
+            result.forfeitedBy == nil && result.isPerfect ? Haptics.success() : Haptics.failure()
         case .vsBot(let level):
             guard let outcome = result.outcome else { return }
             Stats.add(outcome, level: level)
-            switch outcome {
-            case .firstWins: Haptics.success()
-            case .secondWins: Haptics.failure()
-            case .draw: Haptics.move()
-            }
+            feedback(for: outcome)
         case .twoPlayer:
             switch result.outcome {
             case .firstWins?: sessionWins[.first, default: 0] += 1
             case .secondWins?: sessionWins[.second, default: 0] += 1
             default: break
             }
-            Haptics.success()
+            result.forfeitedBy == nil ? Haptics.success() : Haptics.failure()
+        case .online:
+            guard let outcome = result.outcome else { return }
+            switch outcome {
+            case .firstWins: sessionWins[.first, default: 0] += 1
+            case .secondWins: sessionWins[.second, default: 0] += 1
+            case .draw: break
+            }
+            feedback(for: outcome)
+        }
+    }
+
+    private func feedback(for outcome: Outcome) {
+        switch outcome {
+        case .firstWins: Haptics.success()
+        case .secondWins: Haptics.failure()
+        case .draw: Haptics.move()
         }
     }
 }

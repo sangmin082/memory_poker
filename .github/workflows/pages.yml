@@ -1,0 +1,38 @@
+name: Pages
+
+# docs/의 지원·개인정보 페이지를 gh-pages 브랜치로 복사한다.
+# https://sangmin082.github.io/memory_poker/ 는 gh-pages 브랜치를 그대로 보여 준다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/*.html"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish docs to gh-pages
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/site"
+          mkdir -p "$site"
+          cp docs/*.html docs/.nojekyll "$site/"
+          cd "$site"
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "지원·개인정보 페이지 (main ${GITHUB_SHA::7}의 docs/에서 복사)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages

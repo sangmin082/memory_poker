@@ -14,7 +14,7 @@ struct HomeView: View {
 
                 VStack(alignment: .leading, spacing: 0) {
                     wordmark
-                        .padding(.top, 40)
+                        .padding(.top, 24)
 
                     Spacer()
 
@@ -99,6 +99,9 @@ struct HomeView: View {
             menuRow(title: "함께 하기", detail: "한 기기로 둘이서") {
                 GameScreen(mode: .twoPlayer)
             }
+            menuRow(title: "온라인 대전", detail: "방 코드로 각자의 기기에서") {
+                OnlineLobbyView()
+            }
             Rectangle().fill(Theme.hairline).frame(height: 1)
 
             HStack(spacing: 16) {
@@ -162,7 +165,7 @@ struct HomeView: View {
                         .font(.caption)
                         .foregroundStyle(Theme.inkSoft)
                 }
-                .padding(.vertical, 18)
+                .padding(.vertical, 15)
                 .contentShape(Rectangle())
             }
         }

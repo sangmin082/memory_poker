@@ -35,16 +35,16 @@ App Store Connect에 그대로 붙여 넣을 값. 글자 수 제한은 괄호 �
 | 마케팅 URL (선택) | https://sangmin082.github.io/memory_poker/ |
 | 개인정보 처리방침 URL | https://sangmin082.github.io/memory_poker/privacy.html |
 
-위 주소는 저장소 Settings › Pages에서 **main 브랜치 /docs 폴더**를 켜야 열린다.
+`docs/`의 HTML을 고쳐 main에 올리면 **Pages** 워크플로가 gh-pages 브랜치로 복사해 위 주소에 반영한다.
 
 ## 가격 및 사용 가능 여부
 
-- 다른 앱과 같게 하려면: 기준 국가 대한민국, 가격 **₩1,100**, 판매 국가 전체
-- 유료 앱이면 **비즈니스 › 유료 앱 계약**과 은행·세금 정보가 "활성" 상태여야 함
+- **무료**, 판매 국가 전체
 
 ## 앱 개인정보 보호
 
 - "데이터를 수집하지 않음" 선택
+  (온라인 대전은 방 코드와 고른 칸만 중계 서버로 상대에게 전달하고, 사용자·기기를 식별하는 정보는 보내지 않는다)
 
 ## 버전 1.0
 
@@ -72,6 +72,12 @@ App Store Connect에 그대로 붙여 넣을 값. 글자 수 제한은 괄호 �
 ■ 함께 하기
 한 기기로 둘이서. 같이 외우고 번갈아 고릅니다. 기기를 넘길 때 앞사람이 놓은 말은 가려집니다.
 
+■ 온라인 대전
+방을 만들면 6자리 코드가 나옵니다. 친구가 코드를 넣으면 각자의 기기에서 같은 카드를 동시에 외우고 겨룹니다. 회원 가입은 필요 없습니다.
+
+■ 암기 위반
+기억력 대결이니까요. 카드가 공개된 동안 화면을 캡처하면 그 판은 몰수패, 화면 녹화 중에는 카드가 가려집니다.
+
 ■ 규칙과 족보
 스트레이트 플러시부터 하이카드까지, 예시 카드와 함께 한 장으로 정리했습니다. 포커를 몰라도 바로 시작할 수 있습니다.
 
@@ -80,13 +86,13 @@ App Store Connect에 그대로 붙여 넣을 값. 글자 수 제한은 괄호 �
 
 돈이나 칩, 베팅은 없습니다. 오직 기억력 대결입니다.
 
-광고 없음 · 인앱 결제 없음 · 데이터 수집 없음 · 오프라인 플레이
+광고 없음 · 인앱 결제 없음 · 데이터 수집 없음 · 회원 가입 없음
 ```
 
 ### 키워드 (100)
 
 ```
-포커,기억력,암기,카드게임,두뇌게임,족보,홀덤,메모리,집중력,2인용,오프라인,퍼즐,트럼프,두뇌훈련,poker,memory
+포커,기억력,암기,카드게임,두뇌게임,족보,홀덤,메모리,집중력,2인용,온라인,퍼즐,트럼프,두뇌훈련,poker,memory
 ```
 
 ### 이 버전의 새로운 기능
@@ -98,11 +104,15 @@ App Store Connect에 그대로 붙여 넣을 값. 글자 수 제한은 괄호 �
 ### 앱 심사 정보 › 메모
 
 ```
-Memory Poker is a memory game that uses poker hand rankings. There is no betting, no chips, no currency (real or virtual), no in-app purchases and no ads. The app is fully offline and requires no account or sign-in.
+Memory Poker is a memory game that uses poker hand rankings. There is no betting, no chips, no currency (real or virtual), no in-app purchases and no ads. No account or sign-in is required.
 
 How to play: 16 random cards are shown for 20 seconds, then turned face down. Three shared cards are revealed. The player taps 2 of the face-down cards from memory; those 2 cards plus the 3 shared cards form a five-card hand. The higher hand wins.
 
-To try it: tap "연습" (Practice) for a solo round, "컴퓨터 대전" (vs Computer) for a game against the AI, or "함께 하기" (Two Players) for pass-and-play. Tap "카드 공개" (Reveal cards) to start a round; "다 외웠어요" (I've got it) skips the remaining memorization time. The app is also localized in English (switch the device language to English).
+To try it: tap "연습" (Practice) for a solo round, "컴퓨터 대전" (vs Computer) for a game against the AI, or "함께 하기" (Two Players) for pass-and-play. These three modes work offline.
+
+"온라인 대전" (Online) is a two-device match: one device taps "새 방 만들기" (New room) to get a 6-character room code, the other enters it and taps "입장" (Join). It needs two devices, so it cannot be tried alone; the only data exchanged is the room code and the picked cells, relayed by our server without being stored.
+
+Because it is a memory game, taking a screenshot while the 16 cards are face up ends that round as a forfeit, and the cards are hidden during screen recording. Screenshots at any other time are unaffected. Tap "카드 공개" (Reveal cards) to start a round; "다 외웠어요" (I've got it) skips the remaining memorization time. The app is also localized in English (switch the device language to English).
 ```
 
 - 로그인 필요: 아니요 (데모 계정 없음)
@@ -153,6 +163,12 @@ Easy, Normal and Hard. The computer forgets and mixes up cards like a person doe
 ■ Two Players
 Pass and play on one device. Memorize together, then pick in turn — the first player's markers are hidden when you hand over the device.
 
+■ Online
+Create a room to get a 6-character code. When your friend enters it, you both memorize the same cards at the same time and pick on your own devices. No account needed.
+
+■ Memory violations
+It's a memory contest: a screenshot while the cards are face up forfeits the round, and cards are hidden during screen recording.
+
 ■ Rules & Rankings
 Every hand from straight flush to high card on one page, with example cards. No poker experience needed.
 
@@ -161,11 +177,11 @@ Choose 10, 20 or 30 seconds.
 
 No money, no chips, no betting — just memory.
 
-No ads · No in-app purchases · No data collected · Plays offline
+No ads · No in-app purchases · No data collected · No account
 ```
 
 키워드:
 
 ```
-poker,memory,cards,brain,training,concentration,hand rankings,two player,offline,puzzle,holdem
+poker,memory,cards,brain,training,concentration,hand rankings,two player,online,puzzle,holdem
 ```

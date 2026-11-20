@@ -81,6 +81,22 @@
         }
       }
     },
+    "6자리 코드가 만들어집니다. 코드를 친구에게 보내 주세요." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll get a 6-character code. Send it to a friend."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6자리 코드가 만들어집니다. 코드를 친구에게 보내 주세요."
+          }
+        }
+      }
+    },
     "A-2-3-4-5는 5가 가장 높은 스트레이트로 칩니다." : {
       "localizations" : {
         "en" : {
@@ -141,6 +157,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "같은 족보라면"
+          }
+        }
+      }
+    },
+    "같은 카드를 동시에 외우고, 각자의 기기에서 고릅니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memorize the same cards together, pick on your own device"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "같은 카드를 동시에 외우고, 각자의 기기에서 고릅니다"
           }
         }
       }
@@ -273,6 +305,22 @@
         }
       }
     },
+    "기억 포커 대결 초대! 방 코드: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory Poker challenge! Room code: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기억 포커 대결 초대! 방 코드: %@"
+          }
+        }
+      }
+    },
     "기억력이 다른 세 상대" : {
       "localizations" : {
         "en" : {
@@ -301,6 +349,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "나"
+          }
+        }
+      }
+    },
+    "나  %lld : %lld  상대" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You  %lld : %lld  Opponent"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나  %lld : %lld  상대"
+          }
+        }
+      }
+    },
+    "나가기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나가기"
           }
         }
       }
@@ -337,6 +417,22 @@
         }
       }
     },
+    "다른 게임의 방 코드입니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That code belongs to a different game."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다른 게임의 방 코드입니다."
+          }
+        }
+      }
+    },
     "다이아몬드" : {
       "localizations" : {
         "en" : {
@@ -369,6 +465,22 @@
         }
       }
     },
+    "대전 중에 카드가 공개된 화면을 캡처하면 그 판은 몰수패입니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taking a screenshot while the cards are face up forfeits the round."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대전 중에 카드가 공개된 화면을 캡처하면 그 판은 몰수패입니다."
+          }
+        }
+      }
+    },
     "두 사람이 모두 고르면 카드를 공개하고, 더 높은 조합을 만든 쪽이 이깁니다. 같은 카드를 골라도 됩니다." : {
       "localizations" : {
         "en" : {
@@ -381,6 +493,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "두 사람이 모두 고르면 카드를 공개하고, 더 높은 조합을 만든 쪽이 이깁니다. 같은 카드를 골라도 됩니다."
+          }
+        }
+      }
+    },
+    "둘 다 고르면 카드를 공개합니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cards are revealed once both have picked"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "둘 다 고르면 카드를 공개합니다"
+          }
+        }
+      }
+    },
+    "둘 다 준비되면 같은 카드가 동시에 공개됩니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When both are ready, the same cards are revealed together"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "둘 다 준비되면 같은 카드가 동시에 공개됩니다"
           }
         }
       }
@@ -465,6 +609,86 @@
         }
       }
     },
+    "문제가 생겼습니다. 다시 시도해 주세요." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문제가 생겼습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "방 닫기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close room"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방 닫기"
+          }
+        }
+      }
+    },
+    "방 만들기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a room"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방 만들기"
+          }
+        }
+      }
+    },
+    "방 코드 6자리" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6-character code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방 코드 6자리"
+          }
+        }
+      }
+    },
+    "방 코드로 각자의 기기에서" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room code, two devices"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방 코드로 각자의 기기에서"
+          }
+        }
+      }
+    },
     "별 표시가 이 판에서 가장 높은 조합입니다" : {
       "localizations" : {
         "en" : {
@@ -513,6 +737,54 @@
         }
       }
     },
+    "상대" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opponent"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대"
+          }
+        }
+      }
+    },
+    "상대가 고르는 중…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opponent is picking…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대가 고르는 중…"
+          }
+        }
+      }
+    },
+    "상대가 나갔습니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your opponent left"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대가 나갔습니다"
+          }
+        }
+      }
+    },
     "상대는 화면을 보지 마세요" : {
       "localizations" : {
         "en" : {
@@ -525,6 +797,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "상대는 화면을 보지 마세요"
+          }
+        }
+      }
+    },
+    "상대를 기다리는 중…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for opponent…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대를 기다리는 중…"
+          }
+        }
+      }
+    },
+    "상대의 암기 위반 — 승리!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opponent's violation — you win!"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대의 암기 위반 — 승리!"
+          }
+        }
+      }
+    },
+    "상대의 입장을 기다리는 중…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for your opponent to join…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대의 입장을 기다리는 중…"
+          }
+        }
+      }
+    },
+    "새 방 만들기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New room"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 방 만들기"
+          }
+        }
+      }
+    },
+    "서버가 쉬고 있었다면 깨우는 데 1분쯤 걸릴 수 있습니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If the server was asleep, waking it can take about a minute."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버가 쉬고 있었다면 깨우는 데 1분쯤 걸릴 수 있습니다."
+          }
+        }
+      }
+    },
+    "서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't reach the server. Check your internet connection."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요."
+          }
+        }
+      }
+    },
+    "서버와 연결이 끊어졌습니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lost connection to the server."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버와 연결이 끊어졌습니다."
           }
         }
       }
@@ -721,6 +1105,38 @@
         }
       }
     },
+    "암기 위반 — 몰수패" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory violation — you forfeit"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "암기 위반 — 몰수패"
+          }
+        }
+      }
+    },
+    "암기 위반 — 이번 판은 무효" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory violation — round void"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "암기 위반 — 이번 판은 무효"
+          }
+        }
+      }
+    },
     "어떤 족보도 아닐 때, 가장 높은 카드 1장" : {
       "localizations" : {
         "en" : {
@@ -753,6 +1169,54 @@
         }
       }
     },
+    "없는 방 코드입니다. 코드를 다시 확인해 주세요." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No room with that code. Please check it again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "없는 방 코드입니다. 코드를 다시 확인해 주세요."
+          }
+        }
+      }
+    },
+    "연결 중…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연결 중…"
+          }
+        }
+      }
+    },
+    "연결이 끊겨 대전을 이어갈 수 없습니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection was lost, so the match can't continue."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연결이 끊겨 대전을 이어갈 수 없습니다."
+          }
+        }
+      }
+    },
     "연습" : {
       "localizations" : {
         "en" : {
@@ -765,6 +1229,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "연습"
+          }
+        }
+      }
+    },
+    "온라인 대전" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "온라인 대전"
           }
         }
       }
@@ -833,6 +1313,38 @@
         }
       }
     },
+    "이미 두 사람이 들어간 방입니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That room already has two players."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미 두 사람이 들어간 방입니다."
+          }
+        }
+      }
+    },
+    "입장" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "입장"
+          }
+        }
+      }
+    },
     "전적 %lld승 %lld패 %lld무" : {
       "localizations" : {
         "en" : {
@@ -877,6 +1389,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "족보를 이루는 숫자가 더 높은 쪽이 이깁니다. A가 가장 높고 2가 가장 낮습니다."
+          }
+        }
+      }
+    },
+    "준비 완료" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "준비 완료"
           }
         }
       }
@@ -993,6 +1521,38 @@
         }
       }
     },
+    "카드가 공개된 동안 화면을 캡처하면 암기 위반으로 그 판은 몰수패입니다. 화면 녹화 중에는 카드가 가려집니다." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taking a screenshot while the cards are face up is a memory violation and forfeits the round. Cards are hidden during screen recording."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카드가 공개된 동안 화면을 캡처하면 암기 위반으로 그 판은 몰수패입니다. 화면 녹화 중에는 카드가 가려집니다."
+          }
+        }
+      }
+    },
+    "카드가 공개된 동안에는 화면을 캡처할 수 없습니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No screenshots while the cards are face up"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카드가 공개된 동안에는 화면을 캡처할 수 없습니다"
+          }
+        }
+      }
+    },
     "카드가 덮이면 공유 카드 3장이 공개됩니다." : {
       "localizations" : {
         "en" : {
@@ -1053,6 +1613,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "컴퓨터 대전"
+          }
+        }
+      }
+    },
+    "코드 보내기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코드 보내기"
+          }
+        }
+      }
+    },
+    "코드 복사" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코드 복사"
+          }
+        }
+      }
+    },
+    "코드로 입장" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join with a code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코드로 입장"
           }
         }
       }
@@ -1421,6 +2029,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "혼자서 최고의 조합 찾기"
+          }
+        }
+      }
+    },
+    "화면 녹화·미러링 중에는\n카드를 볼 수 없습니다" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cards are hidden while the screen\nis being recorded or mirrored"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화면 녹화·미러링 중에는\n카드를 볼 수 없습니다"
           }
         }
       }

@@ -13,7 +13,7 @@ let package = Package(
         .target(
             name: "MemoryPokerCore",
             path: "MemoryPoker",
-            exclude: ["App", "Views", "Assets.xcassets", "Info.plist", "PrivacyInfo.xcprivacy",
+            exclude: ["App", "Views", "Online", "Assets.xcassets", "Info.plist", "PrivacyInfo.xcprivacy",
                       "InfoPlist.xcstrings", "Localizable.xcstrings"],
             sources: ["Engine", "AI"]
         ),

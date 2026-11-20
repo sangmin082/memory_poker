@@ -2,9 +2,17 @@ import SwiftUI
 
 struct GameScreen: View {
     @State private var model: GameModel
+    @Environment(\.dismiss) private var dismiss
+    /// 화면 녹화·미러링 중인가
+    @Environment(\.isSceneCaptured) private var isSceneCaptured
 
     init(mode: GameMode) {
         _model = State(initialValue: GameModel(mode: mode))
+    }
+
+    /// 온라인: 로비에서 연결을 마친 모델을 넘겨받는다.
+    init(model: GameModel) {
+        _model = State(initialValue: model)
     }
 
     var body: some View {
@@ -26,6 +34,12 @@ struct GameScreen: View {
                     isInteractive: model.selectingSeat != nil,
                     onTap: { model.toggle($0) }
                 )
+                .overlay {
+                    // 녹화·미러링 중에는 외울 카드를 가린다 (시간은 그대로 흐른다)
+                    if isSceneCaptured, model.phase == .memorize {
+                        captureCover
+                    }
+                }
 
                 footer
                     .frame(height: 136, alignment: .bottom)
@@ -49,6 +63,30 @@ struct GameScreen: View {
         }
         .toolbarBackground(Theme.paper, for: .navigationBar)
         .onDisappear { model.stop() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
+            // 규칙: 카드가 공개된 동안 화면을 캡처하면 암기 위반으로 그 판은 몰수패
+            model.screenshotTaken()
+        }
+        .alert("상대가 나갔습니다", isPresented: $model.opponentLeft) {
+            Button("나가기") { dismiss() }
+        } message: {
+            Text("연결이 끊겨 대전을 이어갈 수 없습니다.")
+        }
+    }
+
+    private var captureCover: some View {
+        ZStack {
+            Theme.paper
+            VStack(spacing: 10) {
+                Image(systemName: "eye.slash")
+                    .font(.system(size: 30))
+                Text("화면 녹화·미러링 중에는\n카드를 볼 수 없습니다")
+                    .font(.system(.callout, weight: .semibold))
+                    .multilineTextAlignment(.center)
+            }
+            .foregroundStyle(Theme.ink)
+        }
+        .accessibilityIdentifier("capture-cover")
     }
 
     @ViewBuilder
@@ -64,6 +102,8 @@ struct GameScreen: View {
             }
         case .twoPlayer:
             Text("함께 하기")
+        case .online:
+            Text("온라인 대전")
         }
     }
 
@@ -73,6 +113,8 @@ struct GameScreen: View {
         var map: [Int: [Seat]] = [:]
         if let seat = model.selectingSeat {
             for index in model.selection { map[index] = [seat] }
+        } else if model.phase == .waitingForOpponent, let pick = model.confirmedPick {
+            for index in pick.indices { map[index] = [.first] }
         } else if model.phase == .reveal, let result = model.result {
             for seat in [Seat.first, .second] {
                 guard let pick = result.picks[seat] else { continue }
@@ -128,6 +170,8 @@ struct GameScreen: View {
             } else {
                 Text("카드 2장을 고르세요")
             }
+        case .waitingForOpponent:
+            Text("상대가 고르는 중…")
         case .reveal:
             resultText
         }
@@ -135,15 +179,24 @@ struct GameScreen: View {
 
     @ViewBuilder
     private var resultText: some View {
-        if let result = model.result {
+        if let offender = model.result?.forfeitedBy {
+            switch (model.mode, offender) {
+            case (.practice, _), (.twoPlayer, _):
+                Text("암기 위반 — 이번 판은 무효")
+            case (_, .first):
+                Text("암기 위반 — 몰수패")
+            case (_, .second):
+                Text("상대의 암기 위반 — 승리!")
+            }
+        } else if let result = model.result {
             switch (model.mode, result.outcome) {
             case (.twoPlayer, .firstWins?):
                 Text("플레이어 1 승리!")
             case (.twoPlayer, .secondWins?):
                 Text("플레이어 2 승리!")
-            case (.vsBot, .firstWins?):
+            case (.vsBot, .firstWins?), (.online, .firstWins?):
                 Text("승리!")
-            case (.vsBot, .secondWins?):
+            case (.vsBot, .secondWins?), (.online, .secondWins?):
                 Text("패배…")
             case (_, .draw?):
                 Text("무승부")
@@ -157,7 +210,11 @@ struct GameScreen: View {
     private var hintText: some View {
         switch model.phase {
         case .ready:
-            Text("\(Int(model.memorizeDuration))초 동안 공개된 뒤 다시 덮입니다")
+            if model.mode == .online {
+                Text("둘 다 준비되면 같은 카드가 동시에 공개됩니다")
+            } else {
+                Text("\(Int(model.memorizeDuration))초 동안 공개된 뒤 다시 덮입니다")
+            }
         case .memorize:
             Text("곧 카드가 덮이고 공유 카드 3장이 공개됩니다")
         case .select, .handoff:
@@ -166,8 +223,12 @@ struct GameScreen: View {
             } else {
                 Text("공유 카드 3장과 합쳐 가장 높은 조합을 만드세요")
             }
+        case .waitingForOpponent:
+            Text("둘 다 고르면 카드를 공개합니다")
         case .reveal:
-            if let result = model.result, !result.bestWasFound {
+            if let result = model.result, result.forfeitedBy != nil {
+                Text("카드가 공개된 동안에는 화면을 캡처할 수 없습니다")
+            } else if let result = model.result, !result.bestWasFound {
                 Text("별 표시가 이 판에서 가장 높은 조합입니다")
             } else {
                 Text("별 표시는 이 판에서 가장 높은 조합")
@@ -238,8 +299,16 @@ struct GameScreen: View {
         case .ready:
             VStack(spacing: 12) {
                 recordLine
-                Button("카드 공개") { model.startMemorize() }
-                    .buttonStyle(InkButtonStyle(filled: true))
+                if model.mode == .online {
+                    Button { model.start() } label: {
+                        model.isLocalReady ? Text("상대를 기다리는 중…") : Text("준비 완료")
+                    }
+                    .buttonStyle(InkButtonStyle(filled: !model.isLocalReady))
+                    .disabled(model.isLocalReady)
+                } else {
+                    Button("카드 공개") { model.start() }
+                        .buttonStyle(InkButtonStyle(filled: true))
+                }
             }
         case .memorize:
             Button("다 외웠어요") { model.finishMemorize() }
@@ -254,10 +323,16 @@ struct GameScreen: View {
                     .disabled(!model.canConfirm)
                     .opacity(model.canConfirm ? 1 : 0.35)
             }
+        case .waitingForOpponent:
+            ProgressView()
+                .tint(Theme.ink)
+                .padding(.bottom, 14)
         case .reveal:
             if let result = model.result {
                 VStack(spacing: 8) {
-                    handRow(seat: .first, result: result)
+                    if result.picks[.first] != nil {
+                        handRow(seat: .first, result: result)
+                    }
                     if result.picks[.second] != nil {
                         handRow(seat: .second, result: result)
                     }
@@ -293,6 +368,12 @@ struct GameScreen: View {
                 if first + second > 0 {
                     Text("플레이어 1  \(first) : \(second)  플레이어 2")
                 }
+            case .online:
+                let mine = model.sessionWins[.first] ?? 0
+                let theirs = model.sessionWins[.second] ?? 0
+                if mine + theirs > 0 {
+                    Text("나  \(mine) : \(theirs)  상대")
+                }
             }
         }
         .font(.caption.monospacedDigit())
@@ -308,6 +389,8 @@ struct GameScreen: View {
             return seat == .first ? "나" : "컴퓨터"
         case .twoPlayer:
             return seat == .first ? "플레이어 1" : "플레이어 2"
+        case .online:
+            return seat == .first ? "나" : "상대"
         }
     }
 
